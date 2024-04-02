@@ -1,0 +1,98 @@
+
+import math
+import json
+
+"""
+README
+This file has helper functions and global variables that 
+do not need to be accessed if this file is imported
+
+please only import functions you need by listing them
+
+ex:
+from interperateSigns import interperateHandData
+"""
+
+
+#global variables
+signsFileName = "signs.json"
+signs = {} # sign Name : datavector
+acceptableDistance = .5 #adjust this value to change how close a sign has to be to the definition
+
+
+"""
+To do:
+make a function that uses both interperateHandData and
+interperateIMUData to interperate signs
+"""
+def interperate(handData: list, imuData: list):
+
+    return None
+
+"""
+This function is to interperate finger data from resistance values
+"""
+def interperateHandData(handData : list):
+    global signs, acceptableDistance
+    distance, closest_sign = float("inf"), None
+    for name, vec in signs.items():
+        if ((curr_distance := math.dist(vec, handData)) < distance):
+            distance, closest_sign = curr_distance, name
+    if distance < acceptableDistance:
+        return closest_sign
+    return None
+
+"""
+TO DO
+Make a function to interperate imudata
+Idk how yet
+"""
+def interperateIMUData(imuData : list):
+    pass
+
+def readSignsFromJSON(localFileName : str):
+    global signs
+    with open(localFileName, "r") as file:
+        try:
+            signs = json.load(file)
+        except ValueError: #when file is empty
+            pass
+
+def saveSignsToJSON(localFileName : str):
+    global signs
+    with open(localFileName, "w") as file:
+        json.dump(signs, file)
+
+def addNewSignsToJSON(fileName : str):
+    newSignName = None
+    while True:
+        newSignName = input("What sign do you want to add or overwrite? (Type EXIT to stop program)\n")
+        if newSignName == "EXIT":
+            break
+        newDataVector = input("Please type in the dataVector seperated by commas (no spaces, length 5).\n")
+        try: 
+            newDataVector = [int(i) for i in newDataVector.split(',')]
+        except ValueError:
+            print("invalid vales in vector, please try again")
+            continue
+        if len(newDataVector != 5):
+            print("incorrect number of items in new dataVector, please try again")
+            continue
+        userInput = input("Do you want to add this sign? [y/n]\n" + newSignName + " : " + str(newDataVector)  + '\n')
+        if userInput == 'y' or userInput == 'Y':
+            print("Sign Added: " + newSignName + " : " + str(newDataVector))
+            signs[newSignName] = newDataVector
+        else:
+            print("Sign Not Added")
+    print("Saving added signs to local file " +  signsFileName)
+    saveSignsToJSON(fileName)
+
+
+
+# this function should run on import and when ran as main
+readSignsFromJSON(signsFileName)
+"""
+To add new signs to the json file run this file
+"""
+if __name__ == "__main__":
+    addNewSignsToJSON(signsFileName)
